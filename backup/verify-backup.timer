@@ -1,0 +1,11 @@
+[Unit]
+Description=Weekly verification of all VPS backups
+
+[Timer]
+# Sunday 04:30 UTC — well after the nightly backup finishes.
+OnCalendar=Sun *-*-* 04:30:00
+Persistent=true
+RandomizedDelaySec=30m
+
+[Install]
+WantedBy=timers.target

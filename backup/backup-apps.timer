@@ -1,0 +1,12 @@
+[Unit]
+Description=Run nightly app + Coolify backup to B2
+
+[Timer]
+# 03:17 UTC daily — the offset avoids competing with every other
+# server in the world that picked 03:00 sharp.
+OnCalendar=*-*-* 03:17:00
+Persistent=true
+RandomizedDelaySec=15m
+
+[Install]
+WantedBy=timers.target

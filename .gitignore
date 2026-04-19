@@ -1,0 +1,17 @@
+# Real env files / secrets — only .env.example is committed.
+.env
+*.env
+!.env.example
+
+# Local rclone configs that might contain credentials.
+rclone.conf
+
+# Editor noise.
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Don't commit local aliases (they're VPS-specific).
+backup/aliases.conf

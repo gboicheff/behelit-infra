@@ -1,0 +1,16 @@
+# Optional: maps container, compose project, or Coolify resource names
+# to friendly app keys used in B2 object filenames.
+#
+# Lives at /etc/backups/aliases.conf on the VPS. One per line:
+#   <container-or-project-or-resource-name>=<short-key>
+#
+# You usually don't need this — auto-discovery uses Coolify's
+# resourceName (with the trailing UUID stripped) or the compose project
+# name, which is fine for most cases. Use this only if you want a
+# specific filename like "achievement-tracker" instead of whatever the
+# label happens to say.
+
+# Examples:
+# postgresql-database-abc123def456ghi789jkl0=achievement-tracker
+# coolify-db=coolify
+# bsky_postgres_1=bsky

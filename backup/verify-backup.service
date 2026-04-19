@@ -1,0 +1,10 @@
+[Unit]
+Description=Weekly verification — restore every latest dump into a throwaway pg
+Wants=network-online.target docker.service
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/backups/verify-restore.sh
+StandardOutput=journal
+StandardError=journal

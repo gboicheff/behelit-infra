@@ -1,0 +1,14 @@
+[Unit]
+Description=Nightly backup of all VPS app databases + Coolify config to B2
+Wants=network-online.target docker.service
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+ExecStart=/opt/backups/run.sh
+# Don't email-spam on success; let logger/journald carry the output.
+StandardOutput=journal
+StandardError=journal
