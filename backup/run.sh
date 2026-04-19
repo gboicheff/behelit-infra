@@ -99,8 +99,12 @@ derive_key() {
   done
 
   if [[ -n "$resource" ]]; then
-    # Coolify decorates resourceName with -<22-char uuid>. Strip if present.
-    echo "${resource}" | sed -E 's/-[a-z0-9]{22}$//'
+    # Coolify decorates resourceName with -<20-30 char lowercase uuid>.
+    # (Empirically: 24 chars on v4.0.0-beta.473.) Strip if present.
+    # NOTE: Coolify also concatenates the env name onto the resource
+    # name (e.g. "myapp" + "main" -> "myappmain-<uuid>"). The regex
+    # cannot un-glue that; use aliases.conf for friendly final names.
+    echo "${resource}" | sed -E 's/-[a-z0-9]{20,30}$//'
     return
   fi
 

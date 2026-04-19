@@ -177,7 +177,7 @@ derive_key() {
   explicit="$(container_label "$container" 'backup.name')"
   [[ -n "$explicit" ]] && { echo "$explicit"; return; }
   resource="$(container_label "$container" 'coolify.resourceName')"
-  if [[ -n "$resource" ]]; then echo "${resource}" | sed -E 's/-[a-z0-9]{22}$//'; return; fi
+  if [[ -n "$resource" ]]; then echo "${resource}" | sed -E 's/-[a-z0-9]{20,30}$//'; return; fi
   project="$(container_label "$container" 'com.docker.compose.project')"
   if [[ -n "$project" ]]; then echo "$project"; return; fi
   echo "$container"
