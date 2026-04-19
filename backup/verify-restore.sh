@@ -36,16 +36,18 @@ if [[ -z "$LATEST" ]]; then
 fi
 log "Verifying backup ${LATEST}"
 
-# Throwaway Postgres. Use the OLDEST major version among prod
-# containers as the lowest common denominator. (Newer versions can
-# always restore older dumps; the reverse isn't guaranteed.)
-log "Starting throwaway postgres (postgres:15-alpine)..."
+# Throwaway Postgres. Use the NEWEST major version among prod
+# containers — newer pg can always restore older dumps; the reverse
+# breaks (e.g. PG17 dumps transaction_timeout, which PG15 doesn't
+# understand). Bump VERIFY_PG_IMAGE when prod adopts a newer major.
+VERIFY_PG_IMAGE="${VERIFY_PG_IMAGE:-postgres:17-alpine}"
+log "Starting throwaway postgres (${VERIFY_PG_IMAGE})..."
 docker run -d --rm \
   --name "$TEST_CONTAINER" \
   -e POSTGRES_PASSWORD=verify \
   -e POSTGRES_USER=verify \
   -e POSTGRES_DB=verify \
-  postgres:15-alpine >/dev/null
+  "$VERIFY_PG_IMAGE" >/dev/null
 
 for _ in {1..30}; do
   if docker exec "$TEST_CONTAINER" pg_isready -U verify >/dev/null 2>&1; then break; fi
@@ -75,9 +77,13 @@ for object in "${SQL_OBJECTS[@]}"; do
   # Each dump goes into its own throwaway DB so they can't collide.
   testdb="vt_$(echo "$key" | tr -c 'a-zA-Z0-9' '_')"
   docker exec "$TEST_CONTAINER" createdb -U verify "$testdb" >/dev/null 2>&1 || true
+  errlog="$WORK_DIR/${key}.err"
   if ! gunzip -c "$WORK_DIR/$object" | docker exec -i "$TEST_CONTAINER" \
-       psql -U verify -d "$testdb" -v ON_ERROR_STOP=1 >/dev/null 2>&1; then
-    log "    FAIL: psql restore returned non-zero"
+       psql -U verify -d "$testdb" -v ON_ERROR_STOP=1 >/dev/null 2>"$errlog"; then
+    log "    FAIL: psql restore returned non-zero. First error lines:"
+    grep -m3 -E '^(ERROR|psql:.*ERROR)' "$errlog" 2>/dev/null \
+      | sed 's/^/        /' \
+      | while read -r line; do log "$line"; done
     failures=$((failures + 1)); continue
   fi
   # Generic sanity check: at least one user table exists.
